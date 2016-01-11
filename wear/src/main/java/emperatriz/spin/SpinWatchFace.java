@@ -13,6 +13,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -34,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
  * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
  */
-public class SpinWatchFace extends CanvasWatchFaceService {
+public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEventListener {
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
 
@@ -44,8 +48,14 @@ public class SpinWatchFace extends CanvasWatchFaceService {
      */
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
+    SensorManager mSensorManager;
+
+    int steps=0;
+    int todaySteps=0;
+
     @Override
     public Engine onCreateEngine() {
+
         return new Engine();
     }
 
@@ -63,6 +73,21 @@ public class SpinWatchFace extends CanvasWatchFaceService {
             }
         };
         worker.schedule(task, time, TimeUnit.SECONDS);
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            steps =  (int)event.values[0];
+            if ((DrawUtils.mTime.hour==23 && DrawUtils.mTime.hour==59)||todaySteps==0){
+                todaySteps=steps;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
 
@@ -100,7 +125,7 @@ public class SpinWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
 
         Paint mBackgroundPaint;
-        Paint mTextPaint,mTextPaint2;
+        Paint mTextPaint,mTextPaint2,mTextPaint3;
 
         boolean mAmbient;
 
@@ -114,6 +139,10 @@ public class SpinWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
 
+
+
+
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -122,6 +151,7 @@ public class SpinWatchFace extends CanvasWatchFaceService {
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
+                    .setAcceptsTapEvents(true)
                     .build());
             Resources resources = SpinWatchFace.this.getResources();
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
@@ -131,17 +161,37 @@ public class SpinWatchFace extends CanvasWatchFaceService {
 
             mTextPaint = new Paint();
             mTextPaint2= new Paint();
-            Typeface font1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/radiospace.ttf");
-            Typeface font2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/electrotome.ttf");
+            mTextPaint3= new Paint();
+            Typeface font1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Arborcrest Medium.ttf");
+            Typeface font2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster.ttf");
+            Typeface font3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster.ttf");
             mTextPaint.setTypeface(font1);
             mTextPaint2.setTypeface(font2);
+            mTextPaint3.setTypeface(font3);
 
             DrawUtils.mTime = new Time();
+
+            mSensorManager = ((SensorManager)getSystemService(SENSOR_SERVICE));
+            Sensor mStepCountSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+            mSensorManager.registerListener(SpinWatchFace.this, mStepCountSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        boolean normal=true;
+
+        @Override
+        public void onTapCommand(int tapType, int x, int y, long eventTime) {
+
+            if (tapType==TAP_TYPE_TAP){
+                normal=!normal;
+            }
+
+
         }
 
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+            mSensorManager.unregisterListener(SpinWatchFace.this);
             super.onDestroy();
         }
 
@@ -188,14 +238,14 @@ public class SpinWatchFace extends CanvasWatchFaceService {
             mRegisteredTimeZoneReceiver = false;
             SpinWatchFace.this.unregisterReceiver(mTimeZoneReceiver);
         }
-
+        boolean isRound;
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
 
             // Load resources that have alternate values for round watches.
             Resources resources = SpinWatchFace.this.getResources();
-            boolean isRound = insets.isRound();
+            isRound = insets.isRound();
             mXOffset = resources.getDimension(isRound
                     ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
             float textSize = resources.getDimension(isRound
@@ -232,9 +282,9 @@ public class SpinWatchFace extends CanvasWatchFaceService {
                 int speed11 = Math.round(DrawUtils.random(5,1500));
                 int speed22 = Math.round(DrawUtils.random(5,1500));
                 int speed33 = Math.round(DrawUtils.random(5,1500));
-                size1 = DrawUtils.random(0.4f, 0.65f);
-                size2 = DrawUtils.random(0.4f, 0.75f);
-                size3 = DrawUtils.random(0.4f, 0.85f);
+                size1 = DrawUtils.random(0.55f, 0.90f);
+                size2 = DrawUtils.random(0.55f, 0.80f);
+                size3 = DrawUtils.random(0.55f, 0.80f);
                 clockwise1 = DrawUtils.random(0,1)>0.50;
                 clockwise2 = DrawUtils.random(0,1)>0.50;
                 clockwise3 = DrawUtils.random(0,1)>0.50;
@@ -244,9 +294,9 @@ public class SpinWatchFace extends CanvasWatchFaceService {
                 int max = Math.max(speed11, Math.max(speed22,speed33));
                 int min = Math.min(speed11, Math.min(speed22, speed33));
 
-                speed1 = 12;
-                speed2 =12;
-                speed3 =12;
+                speed1 = 13;
+                speed2 =13;
+                speed3 =13;
                 if (speed11==max) {
                     speed1=3;
                 } else if (speed22==max) {
@@ -255,11 +305,11 @@ public class SpinWatchFace extends CanvasWatchFaceService {
                     speed3=3;
                 }
                 if (speed11==min) {
-                    speed1=6;
+                    speed1=5;
                 } else if (speed22==min) {
-                    speed2=6;
+                    speed2=5;
                 } else {
-                    speed3=6;
+                    speed3=5;
                 }
             }
             invalidate();
@@ -267,12 +317,12 @@ public class SpinWatchFace extends CanvasWatchFaceService {
 
 
 
-        int speed1 = 6;
-        int speed2 = 12;
+        int speed1 = 5;
+        int speed2 = 13;
         int speed3 = 3;
-        float size1 = DrawUtils.random(0.4f, 0.85f);
-        float size2 = DrawUtils.random(0.4f, 0.85f);
-        float size3 = DrawUtils.random(0.4f, 0.85f);
+        float size1 = DrawUtils.random(0.55f, 0.90f);
+        float size2 = DrawUtils.random(0.55f, 0.80f);
+        float size3 = DrawUtils.random(0.55f, 0.80f);
         boolean clockwise1 = DrawUtils.random(0,1)>0.50;
         boolean clockwise2 = DrawUtils.random(0,1)>0.50;
         boolean clockwise3 = DrawUtils.random(0,1)>0.50;
@@ -297,15 +347,26 @@ public class SpinWatchFace extends CanvasWatchFaceService {
 
             DrawUtils.drawBackground(0xff000000, new Paint());
 
-            DrawUtils.drawSpin(color, speed1, 1.65f, size1, clockwise1);
-            DrawUtils.drawSpin(color, speed2, 1.10f, size2, clockwise2);
-            DrawUtils.drawSpin(color, speed3, 0.55f, size3, clockwise3);
 
-            DrawUtils.drawSeconds(color);
+            if (!isRound){
+                DrawUtils.drawSpin2(color, speed1, 3.50f, size1, clockwise1);
+                DrawUtils.drawSpin2(color, speed2, 2.25f, size2, clockwise2);
+                DrawUtils.drawSpin2(color, speed3, 1.125f, size3, clockwise3);
+                DrawUtils.drawSeconds2(color);
+                DrawUtils.drawSeconds2(color);
+            }else{
+                DrawUtils.drawSpin(color, speed1, 1.65f, size1, clockwise1);
+                DrawUtils.drawSpin(color, speed2, 1.10f, size2, clockwise2);
+                DrawUtils.drawSpin(color, speed3, 0.55f, size3, clockwise3);
+                DrawUtils.drawSeconds(color);
+                DrawUtils.drawSeconds(color);
+            }
+
+
             DecimalFormat df = new DecimalFormat("00");
-            DrawUtils.drawCenteredText(df.format(DrawUtils.mTime.hour)+":"+df.format(DrawUtils.mTime.minute),mTextPaint);
+            DrawUtils.drawCenteredText(df.format(DrawUtils.mTime.hour)+":"+df.format(DrawUtils.mTime.minute), mTextPaint2);
 
-            DrawUtils.drawDate(0xffffffff, mTextPaint2);
+            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, normal,steps-todaySteps);
 
 
             if (isVisible() && !isInAmbientMode()) {
