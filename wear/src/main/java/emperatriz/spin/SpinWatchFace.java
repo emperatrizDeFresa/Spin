@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -29,6 +31,8 @@ import android.view.WindowInsets;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,6 +56,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
     int steps=0;
     int todaySteps=0;
+    boolean saveLastSteps=true;
 
     @Override
     public Engine onCreateEngine() {
@@ -80,8 +85,12 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
             steps =  (int)event.values[0];
-            if ((DrawUtils.mTime.hour==23 && DrawUtils.mTime.hour==59)||todaySteps==0){
+            if (saveLastSteps){
+                saveLastSteps=false;
+                SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+                DrawUtils.set("lastSteps",sdf.format(new Date()),SpinWatchFace.this);
                 todaySteps=steps;
+                DrawUtils.set("steps",todaySteps, SpinWatchFace.this);
             }
         }
     }
@@ -102,7 +111,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             public void handleMessage(Message message) {
                 switch (message.what) {
                     case MSG_UPDATE_TIME:
-                        invalidate();
+                        invalidateAfter();
                         if (shouldTimerBeRunning()) {
                             long timeMs = System.currentTimeMillis();
                             long delayMs = INTERACTIVE_UPDATE_RATE_MS
@@ -162,12 +171,12 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             mTextPaint = new Paint();
             mTextPaint2= new Paint();
             mTextPaint3= new Paint();
-            Typeface font1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Arborcrest Medium.ttf");
+            Typeface font1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster Bold.ttf");
             Typeface font2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster.ttf");
-            Typeface font3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster.ttf");
+//            Typeface font3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster Bold.ttf");
             mTextPaint.setTypeface(font1);
-            mTextPaint2.setTypeface(font2);
-            mTextPaint3.setTypeface(font3);
+            mTextPaint2.setTypeface(font1);
+            mTextPaint3.setTypeface(font2);
 
             DrawUtils.mTime = new Time();
 
@@ -203,9 +212,18 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             return paint;
         }
 
+
+
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+
+            String lastSteps = DrawUtils.get("lastSteps",SpinWatchFace.this);
+            if (!lastSteps.equals(sdf.format(new Date()))){
+                saveLastSteps=true;
+            }
 
             if (visible) {
                 registerReceiver();
@@ -263,7 +281,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-            invalidate();
+            invalidateAfter();
         }
 
         @Override
@@ -279,53 +297,37 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
                 releaseWakelockAfter(15);
 
-                int speed11 = Math.round(DrawUtils.random(5,1500));
-                int speed22 = Math.round(DrawUtils.random(5,1500));
-                int speed33 = Math.round(DrawUtils.random(5,1500));
-                size1 = DrawUtils.random(0.55f, 0.90f);
+//                speed1 = Math.round(DrawUtils.random(3,13));
+//                speed2 = Math.round(DrawUtils.random(3,13));
+//                speed3 = Math.round(DrawUtils.random(3,13));
+//                speed4 = Math.round(DrawUtils.random(3,13));
+                size1 = DrawUtils.random(0.55f, 0.80f);
                 size2 = DrawUtils.random(0.55f, 0.80f);
-                size3 = DrawUtils.random(0.55f, 0.80f);
+                size3 = DrawUtils.random(0.35f, 0.70f);
+                size4 = DrawUtils.random(0.35f, 0.70f);
                 clockwise1 = DrawUtils.random(0,1)>0.50;
-                clockwise2 = DrawUtils.random(0,1)>0.50;
                 clockwise3 = DrawUtils.random(0,1)>0.50;
-                if (clockwise1==clockwise2){
-                    clockwise3 = !clockwise1;
-                }
-                int max = Math.max(speed11, Math.max(speed22,speed33));
-                int min = Math.min(speed11, Math.min(speed22, speed33));
+                clockwise4 = DrawUtils.random(0,1)>0.50;
+                clockwise2=!clockwise1;
 
-                speed1 = 13;
-                speed2 =13;
-                speed3 =13;
-                if (speed11==max) {
-                    speed1=3;
-                } else if (speed22==max) {
-                    speed2=3;
-                } else {
-                    speed3=3;
-                }
-                if (speed11==min) {
-                    speed1=5;
-                } else if (speed22==min) {
-                    speed2=5;
-                } else {
-                    speed3=5;
-                }
             }
-            invalidate();
+            invalidateAfter();
         }
 
 
 
-        int speed1 = 5;
-        int speed2 = 13;
-        int speed3 = 3;
-        float size1 = DrawUtils.random(0.55f, 0.90f);
+        int speed1 = 3;
+        int speed2 = 5;
+        int speed3 = 7;
+        int speed4 = 13;
+        float size1 = DrawUtils.random(0.55f, 0.80f);
         float size2 = DrawUtils.random(0.55f, 0.80f);
-        float size3 = DrawUtils.random(0.55f, 0.80f);
+        float size3 = DrawUtils.random(0.35f, 0.70f);
+        float size4 = DrawUtils.random(0.35f, 0.70f);
         boolean clockwise1 = DrawUtils.random(0,1)>0.50;
-        boolean clockwise2 = DrawUtils.random(0,1)>0.50;
+        boolean clockwise2 = !clockwise1;
         boolean clockwise3 = DrawUtils.random(0,1)>0.50;
+        boolean clockwise4 = DrawUtils.random(0,1)>0.50;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -341,6 +343,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             DrawUtils.ctx = getApplicationContext();
             DrawUtils.p20 = bounds.width()/20;
 
+
             SharedPreferences preferences = getSharedPreferences("spin", MODE_PRIVATE);
 
             int color = preferences.getInt(DrawUtils.ACCENT_COLOR, 0xff00ffdd);
@@ -348,29 +351,34 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             DrawUtils.drawBackground(0xff000000, new Paint());
 
 
+            float chunk = DrawUtils.p20(0.025f);
+            float chunkSq = DrawUtils.p20(0.05f);
+
             if (!isRound){
-                DrawUtils.drawSpin2(color, speed1, 3.50f, size1, clockwise1);
-                DrawUtils.drawSpin2(color, speed2, 2.25f, size2, clockwise2);
-                DrawUtils.drawSpin2(color, speed3, 1.125f, size3, clockwise3);
-                DrawUtils.drawSeconds2(color);
-                DrawUtils.drawSeconds2(color);
+                DrawUtils.drawSpin2(color, speed1, chunkSq * 4, size1, clockwise1, false);
+                DrawUtils.drawSpin2(color, speed2, chunkSq*3, size2, clockwise2,true);
+                DrawUtils.drawSpin2(color, speed3, chunkSq*2, size3, clockwise3,true);
+                DrawUtils.drawSpin2(color, speed4, chunkSq, 1, clockwise4,true);
+                DrawUtils.drawSeconds2(color,chunkSq);
             }else{
-                DrawUtils.drawSpin(color, speed1, 1.65f, size1, clockwise1);
-                DrawUtils.drawSpin(color, speed2, 1.10f, size2, clockwise2);
-                DrawUtils.drawSpin(color, speed3, 0.55f, size3, clockwise3);
-                DrawUtils.drawSeconds(color);
-                DrawUtils.drawSeconds(color);
+                DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
+                DrawUtils.drawSpin(color, speed2, chunk*3, size2, clockwise2,true);
+                DrawUtils.drawSpin(color, speed3, chunk*2, size3, clockwise3,true);
+                DrawUtils.drawSpin(color, speed4, chunk, 1, clockwise4,true);
+                DrawUtils.drawSeconds(color, chunk);
             }
 
 
             DecimalFormat df = new DecimalFormat("00");
-            DrawUtils.drawCenteredText(df.format(DrawUtils.mTime.hour)+":"+df.format(DrawUtils.mTime.minute), mTextPaint2);
+            float dateHeight = DrawUtils.drawCenteredText(df.format(DrawUtils.mTime.hour)+":"+ df.format(DrawUtils.mTime.minute),"", mTextPaint3, mTextPaint);
 
-            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, normal,steps-todaySteps);
+
+            todaySteps = DrawUtils.getI("steps", SpinWatchFace.this);
+            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, normal,steps-todaySteps, dateHeight);
 
 
             if (isVisible() && !isInAmbientMode()) {
-                invalidate();
+                invalidateAfter();
             }
 
         }
@@ -378,14 +386,13 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
         private final ScheduledExecutorService worker =
                 Executors.newSingleThreadScheduledExecutor();
 
-        void invalidateAfter(int time) {
-
+        void invalidateAfter() {
             Runnable task = new Runnable() {
                 public void run() {
                     invalidate();
                 }
             };
-            worker.schedule(task, time, TimeUnit.MILLISECONDS);
+            worker.schedule(task, 12, TimeUnit.MILLISECONDS);
 
         }
 

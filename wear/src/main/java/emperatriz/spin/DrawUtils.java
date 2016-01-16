@@ -1,6 +1,9 @@
 package emperatriz.spin;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -33,9 +36,7 @@ public class DrawUtils {
 
 
 
-
-
-    private static float p20(float factor){
+    public static float p20(float factor){
         return p20*factor;
     }
 
@@ -53,8 +54,8 @@ public class DrawUtils {
         }
     }
 
-    public static void drawCenteredText(String hhmm, Paint paint){
-        float size=p20(11f);
+    public static float drawCenteredText(String hh, String mm, Paint paint, Paint paint2){
+        float size=p20(10f);
 
         float gap=180;
         if (!isInAmbientMode) {
@@ -68,44 +69,57 @@ public class DrawUtils {
         }
         paint.setAntiAlias(true);
         paint.setTextSize(size);
-
+        paint2.setAntiAlias(true);
+        paint2.setTextSize(size);
 
 
         int cHeight = canvas.getClipBounds().height();
         int cWidth = canvas.getClipBounds().width();
         Rect r = new Rect();
         paint.setTextAlign(Paint.Align.LEFT);
-        paint.getTextBounds(hhmm, 0, hhmm.length(), r);
-        float xPos = cWidth / 2f - r.width() / 2f - r.left;
+        paint.getTextBounds(hh, 0, hh.length(), r);
+        Rect r2 = new Rect();
+        paint2.setTextAlign(Paint.Align.LEFT);
+        paint2.getTextBounds(mm, 0, mm.length(), r2);
+        float xPos = cWidth / 2f - (r.width()+r2.width()) / 2f - r.left - r2.left;
+        float x2Pos = xPos + r.width()+ r2.left*2;
         float yPos = cHeight / 2f + r.height() / 2f - r.bottom;
 
         if (isInAmbientMode){
             paint.setColor(0xff000000);
             paint.setShadowLayer(2, 0, 0, 0xffffffff);
-            canvas.drawText(hhmm, xPos, yPos, paint);
-            canvas.drawText(hhmm,xPos,yPos,paint);
-            canvas.drawText(hhmm,xPos,yPos,paint);
-            canvas.drawText(hhmm,xPos,yPos,paint);
-            canvas.drawText(hhmm, xPos, yPos, paint);
-            canvas.drawText(hhmm, xPos, yPos, paint);
+            paint2.setColor(0xff000000);
+            paint2.setShadowLayer(2, 0, 0, 0xffffffff);
+            canvas.drawText(hh, xPos, yPos, paint);
+            canvas.drawText(mm, x2Pos, yPos, paint2);
+            canvas.drawText(hh, xPos, yPos, paint);
+            canvas.drawText(mm, x2Pos, yPos, paint2);
+            canvas.drawText(hh, xPos, yPos, paint);
+            canvas.drawText(mm, x2Pos, yPos, paint2);
+            canvas.drawText(hh, xPos, yPos, paint);
+            canvas.drawText(mm, x2Pos, yPos, paint2);
 
 
         }else{
             paint.setColor(0xffffffff);
             paint.setShadowLayer(0, 0, 0, 0xffffffff);
-            canvas.drawText(hhmm, xPos, yPos, paint);
+            paint2.setColor(0xffffffff);
+            paint2.setShadowLayer(0, 0, 0, 0xffffffff);
+            canvas.drawText(hh, xPos, yPos, paint);
+            canvas.drawText(mm, x2Pos, yPos, paint2);
+
         }
 
 
-
+        return r.height();
 
     }
 
 
 
-    public static void drawDate(int color, Paint paint2, boolean normal, int steps){
+    public static void drawDate(int color, Paint paint2, boolean normal, int steps, float centerGap){
 
-
+        float padding = p20(1.5f);
 
         SimpleDateFormat sdf = new SimpleDateFormat("d MMMM");
 
@@ -114,48 +128,62 @@ public class DrawUtils {
         Paint paint = paint2;
         paint.setAntiAlias(true);
 
-        paint.setTextSize(Math.round(p20(1.3f)));
+        paint.setTextSize(Math.round(p20(2f)));
+        paint.setFakeBoldText(true);
+        paint.setSubpixelText(true);
 
 
 
         boolean dayTime = (mTime.hour < 20) && (mTime.hour>8);
 
         String dateText = sdf.format(Calendar.getInstance().getTime()).toUpperCase().replace(".","");
-        String dateText2 = normal?sdf2.format(Calendar.getInstance().getTime()).toUpperCase():steps+" PASOS";
+        String dateText2 = normal?sdf2.format(Calendar.getInstance().getTime()).toUpperCase():steps+ctx.getString(R.string.steps);
 
         float textWidth = paint.measureText(dateText);
         float textWidth2 = paint.measureText(dateText2);
 
+        int cHeight = canvas.getClipBounds().height();
+        int cWidth = canvas.getClipBounds().width();
         Rect r = new Rect();
-        paint.getTextBounds(mTime.monthDay + "", 0, (mTime.monthDay + "").length(), r);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.getTextBounds(dateText, 0, dateText.length(), r);
+        float xUp = cWidth / 2f - r.width() / 2f - r.left;
+        float yUp = cHeight / 2f + r.height() / 2f - r.bottom - centerGap/2 - padding;
+        paint.getTextBounds(dateText2, 0, dateText2.length(), r);
+        float xDown = cWidth / 2f - r.width() / 2f - r.left;
+        float yDown = cHeight / 2f + r.height() / 2f - r.bottom + centerGap/2 + padding;
+
+
+//        Rect r = new Rect();
+//        paint.getTextBounds(mTime.monthDay + "", 0, (mTime.monthDay + "").length(), r);
 
         if (!isInAmbientMode) {
-//            paint.setShadowLayer(shadowRadius,0,0,color2);
+            paint.setShadowLayer(0, 0, 0, 0xff000000);
             paint.setColor(color);
 
         }
         else{
-//            paint.setShadowLayer(shadowRadius,0,0,0xff000000);
-            paint.setColor(dayTime?day:night);
+            paint.setShadowLayer(0, 0, 0, 0xff000000);
+            paint.setColor(dayTime ? day : night);
         }
 
-        canvas.drawText(dateText,width/2-textWidth/2,p20(5.61f),paint);
-        canvas.drawText(dateText2,width/2-textWidth2/2,height-p20(6.80f)+(p20(1.93f)),paint);
+        canvas.drawText(dateText,xUp,yUp,paint);
+        canvas.drawText(dateText2,xDown, yDown,paint);
 
 
     }
 
-    public static void drawSeconds(int color){
+    public static void drawSeconds(int color, float chunk){
         if (!isInAmbientMode) {
 
             RectF r1 = new RectF();
 
-            paint.setStrokeWidth(p20(3.3f));
+            paint.setStrokeWidth(p20(chunk * 8));
             paint.setAntiAlias(true);
             paint.setStrokeCap(Paint.Cap.BUTT);
             paint.setStyle(Paint.Style.STROKE);
             paint.setFilterBitmap(false);
-            float margin = 1.65f;
+            float margin = chunk*4;
             r1.set(p20(margin), p20(margin), width - p20(margin), width - p20(margin));
 
             paint.setShadowLayer(4, 0, 0, 0x00000000);
@@ -168,7 +196,7 @@ public class DrawUtils {
 
             paint.setColor(color);
             paint.setShadowLayer(4, 0, 0, 0xff000000);
-            canvas.drawArc(r1, startAngle, 3, false, paint);
+            canvas.drawArc(r1, startAngle-3, 3, false, paint);
             //canvas.drawArc(r1, startAngle, 2, false, paint);
 
 
@@ -178,12 +206,12 @@ public class DrawUtils {
 
     }
 
-    public static void drawSeconds2(int color){
+    public static void drawSeconds2(int color, float chunk){
         if (!isInAmbientMode) {
 
            RectF r1 = new RectF();
 
-            paint.setStrokeWidth(p20(7.0f));
+            paint.setStrokeWidth(p20(chunk * 8));
             paint.setAntiAlias(true);
             paint.setStrokeCap(Paint.Cap.BUTT);
             paint.setStyle(Paint.Style.STROKE);
@@ -201,7 +229,7 @@ public class DrawUtils {
 
             paint.setColor(color);
             paint.setShadowLayer(4, 0, 0, 0xff000000);
-            canvas.drawArc(r1, startAngle, 2, false, paint);
+            canvas.drawArc(r1, startAngle-3, 3, false, paint);
             //canvas.drawArc(r1, startAngle, 2, false, paint);
 
 
@@ -211,10 +239,10 @@ public class DrawUtils {
 
     }
 
-    public static void drawSpin(int color, int speed, float widthStroke, float size, boolean clockwise){
+    public static void drawSpin(int color, int speed, float widthStroke, float size, boolean clockwise, boolean alpha){
 
         if (!isInAmbientMode) {
-            if (size>1.50){
+            if (!alpha){
                 float[] hsv = new float[3];
                 Color.colorToHSV(color, hsv);
                 hsv[2] *= 0.274f; // value component
@@ -246,10 +274,10 @@ public class DrawUtils {
 
     }
 
-    public static void drawSpin2(int color, int speed, float widthStroke, float size, boolean clockwise){
+    public static void drawSpin2(int color, int speed, float widthStroke, float size, boolean clockwise, boolean alpha){
 
         if (!isInAmbientMode) {
-            if (size>1.50){
+            if (!alpha){
                 float[] hsv = new float[3];
                 Color.colorToHSV(color, hsv);
                 hsv[2] *= 0.274f; // value component
@@ -260,13 +288,13 @@ public class DrawUtils {
 
             RectF r1 = new RectF();
 
-            paint.setStrokeWidth(p20(widthStroke*2));
+            paint.setStrokeWidth(p20(widthStroke * 2));
             paint.setAntiAlias(true);
             paint.setStrokeCap(Paint.Cap.BUTT);
             paint.setStyle(Paint.Style.STROKE);
             paint.setFilterBitmap(false);
 
-            r1.set(0, 0, width , width );
+            r1.set(0, 0, width, width);
 
             paint.setShadowLayer(0, 0, 0, 0xff000000);
 
@@ -285,6 +313,30 @@ public class DrawUtils {
     public static float random(float max, float min){
         Random r = new Random();
         return (max-min)*r.nextFloat()+min;
+    }
+
+    public static String get(String key, Context context){
+        SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
+        return preferences.getString(key, "");
+    }
+
+    public static void set(String key, String value, Context context){
+        SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putString(key, value);
+        edit.commit();
+    }
+
+    public static void set(String key, int value, Context context){
+        SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putInt(key, value);
+        edit.commit();
+    }
+
+    public static int getI(String key, Context context){
+        SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
+        return preferences.getInt(key, 0);
     }
 
 
