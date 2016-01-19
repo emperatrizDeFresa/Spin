@@ -89,7 +89,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                 saveLastSteps=false;
                 SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
                 DrawUtils.set("lastSteps",sdf.format(new Date()),SpinWatchFace.this);
-                todaySteps=steps;
+                todaySteps=steps-1;
                 DrawUtils.set("steps",todaySteps, SpinWatchFace.this);
             }
         }
@@ -374,7 +374,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
 
             todaySteps = DrawUtils.getI("steps", SpinWatchFace.this);
-            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, normal,steps-todaySteps, dateHeight);
+            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, normal,saveLastSteps?0:steps-todaySteps, dateHeight);
 
 
             if (isVisible() && !isInAmbientMode()) {
