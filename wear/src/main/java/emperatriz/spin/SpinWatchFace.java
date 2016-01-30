@@ -32,6 +32,7 @@ import android.view.WindowInsets;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
@@ -57,6 +58,12 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
     int steps=0;
     int todaySteps=0;
     boolean saveLastSteps=true;
+
+
+    static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3;
+    static int WEEKDAY=0, STEPS=1;
+    int outmode = NORMAL;
+    int inmode = WEEKDAY;
 
     @Override
     public Engine onCreateEngine() {
@@ -187,11 +194,29 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
         boolean normal=true;
 
+
+
         @Override
         public void onTapCommand(int tapType, int x, int y, long eventTime) {
 
-            if (tapType==TAP_TYPE_TAP){
-                normal=!normal;
+            if (tapType==TAP_TYPE_TOUCH){
+                if (Calendar.getInstance().getTimeInMillis()-DrawUtils.getL("lastTap", getApplicationContext())<300){
+                    int centerX = DrawUtils.width/2;
+                    int centerY = DrawUtils.width/2;
+                    double tapMeasure = Math.sqrt((x-centerX)*(x-centerX)+(y-centerY)*(y-centerY));
+                    float radius = DrawUtils.width/2-DrawUtils.p20(isRound?chunk:chunkSq)*4;
+
+                    if (tapMeasure<radius){
+                        inmode++;
+                        if (inmode>=2) inmode=0;
+                    }
+                    else{
+                        outmode++;
+                        if (outmode>=4) outmode=0;
+                    }
+                }
+                DrawUtils.set("lastTap",Calendar.getInstance().getTimeInMillis(),getApplicationContext());
+
             }
 
 
@@ -329,6 +354,9 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
         boolean clockwise3 = DrawUtils.random(0,1)>0.50;
         boolean clockwise4 = DrawUtils.random(0,1)>0.50;
 
+        float chunk = DrawUtils.p20(0.025f);
+        float chunkSq = DrawUtils.p20(0.05f);
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
@@ -351,22 +379,74 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             DrawUtils.drawBackground(0xff000000, new Paint());
 
 
-            float chunk = DrawUtils.p20(0.025f);
-            float chunkSq = DrawUtils.p20(0.05f);
+            chunk = DrawUtils.p20(0.025f);
+            chunkSq = DrawUtils.p20(0.05f);
 
-            if (!isRound){
-                DrawUtils.drawSpin2(color, speed1, chunkSq * 4, size1, clockwise1, false);
-                DrawUtils.drawSpin2(color, speed2, chunkSq*3, size2, clockwise2,true);
-                DrawUtils.drawSpin2(color, speed3, chunkSq*2, size3, clockwise3,true);
-                DrawUtils.drawSpin2(color, speed4, chunkSq, 1, clockwise4,true);
-                DrawUtils.drawSeconds2(color,chunkSq);
-            }else{
-                DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
-                DrawUtils.drawSpin(color, speed2, chunk*3, size2, clockwise2,true);
-                DrawUtils.drawSpin(color, speed3, chunk*2, size3, clockwise3,true);
-                DrawUtils.drawSpin(color, speed4, chunk, 1, clockwise4,true);
-                DrawUtils.drawSeconds(color, chunk);
+
+
+            if (outmode==NORMAL){
+                if (!isRound){
+                    DrawUtils.drawSpin2(color, speed1, chunkSq * 4, size1, clockwise1, false);
+                    DrawUtils.drawSpin2(color, speed2, chunkSq*3, size2, clockwise2,true);
+                    DrawUtils.drawSpin2(color, speed3, chunkSq*2, size3, clockwise3,true);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq, 1, clockwise4,true);
+                    DrawUtils.drawSeconds2(color,chunkSq);
+                }else{
+                    DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
+                    DrawUtils.drawSpin(color, speed2, chunk*3, size2, clockwise2,true);
+                    DrawUtils.drawSpin(color, speed3, chunk*2, size3, clockwise3,true);
+                    DrawUtils.drawSpin(color, speed4, chunk, 1, clockwise4,true);
+                    DrawUtils.drawSeconds(color, chunk);
+                }
+            } else if (outmode==NORMAL_OVERLAP){
+                if (!isRound){
+                    DrawUtils.drawSpin2(color, speed1, chunkSq * 4, size1, clockwise1, false);
+                    DrawUtils.drawSpin2(color, speed2, chunkSq*4, size2, clockwise2,true);
+                    DrawUtils.drawSpin2(color, speed3, chunkSq*4, size3, clockwise3,true);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq*4, size4, clockwise4,true);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq*4, 1, clockwise4,true);
+                    DrawUtils.drawSeconds2(color,chunkSq);
+                }else{
+                    DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
+                    DrawUtils.drawSpin(color, speed2, chunk*4, size2, clockwise2,true);
+                    DrawUtils.drawSpin(color, speed3, chunk*4, size3, clockwise3,true);
+                    DrawUtils.drawSpin(color, speed4, chunk * 4, size4, clockwise4, true);
+                    DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise4,true);
+                    DrawUtils.drawSeconds(color, chunk);
+                }
+            }else if (outmode==CIRCLE){
+                if (!isRound){
+                    DrawUtils.drawSpin2(color, speed1, chunkSq * 4, 1, clockwise1, false);
+                    DrawUtils.drawSpin2(color, speed2, chunkSq*3, size2, clockwise2, true);
+                    DrawUtils.drawSpin2(color, speed3, chunkSq*2, size3, clockwise3, true);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq, size1, clockwise1,true);
+                    DrawUtils.drawCircle(color, chunkSq, mTextPaint);
+                }else{
+                    DrawUtils.drawSpin(color, speed1, chunk*4, 1, clockwise1,false);
+                    DrawUtils.drawSpin(color, speed2, chunk*3, size2, clockwise2,true);
+                    DrawUtils.drawSpin(color, speed3, chunk*2, size3, clockwise3,true);
+                    DrawUtils.drawSpin(color, speed4, chunk, size1, clockwise1,true);
+                    DrawUtils.drawCircle(color, chunk, mTextPaint);
+                }
+            } else if (outmode==CIRCLE_OVERLAP){
+                if (!isRound){
+                    DrawUtils.drawSpin2(color, speed1, chunkSq * 4, size1, clockwise1, false);
+                    DrawUtils.drawSpin2(color, speed2, chunkSq*4, size2, clockwise2,true);
+                    DrawUtils.drawSpin2(color, speed3, chunkSq*4, size3, clockwise3,true);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq * 4, size4, clockwise4, true);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq*4, 1, clockwise4,true);
+                    DrawUtils.drawNoCircle(color, chunkSq, mTextPaint);
+                }else{
+                    DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
+                    DrawUtils.drawSpin(color, speed2, chunk*4, size2, clockwise2,true);
+                    DrawUtils.drawSpin(color, speed3, chunk*4, size3, clockwise3,true);
+                    DrawUtils.drawSpin(color, speed4, chunk * 4, size4, clockwise4, true);
+                    DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise4,true);
+                    DrawUtils.drawNoCircle(color, chunk, mTextPaint);
+                }
             }
+
+
 
 
             DecimalFormat df = new DecimalFormat("00");
@@ -374,7 +454,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
 
             todaySteps = DrawUtils.getI("steps", SpinWatchFace.this);
-            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, normal,saveLastSteps?0:steps-todaySteps, dateHeight);
+            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, inmode==WEEKDAY,saveLastSteps?0:steps-todaySteps, dateHeight);
 
 
             if (isVisible() && !isInAmbientMode()) {

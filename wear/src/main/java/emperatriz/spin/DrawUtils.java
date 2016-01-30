@@ -186,21 +186,13 @@ public class DrawUtils {
             float margin = chunk*4;
             r1.set(p20(margin), p20(margin), width - p20(margin), width - p20(margin));
 
-            paint.setShadowLayer(4, 0, 0, 0x00000000);
-
             float millis = System.currentTimeMillis()%60000;
             float startAngle = (360*millis/60000)-90;
 
-//            paint.setColor(0xff000000);
-//            canvas.drawArc(r1, startAngle - 1, 4, false, paint);
-
+            paint.setColor(Color.argb(160, Color.red(0), Color.green(0), Color.blue(0)));
+            canvas.drawArc(r1, startAngle-4, 5, false, paint);
             paint.setColor(color);
-            paint.setShadowLayer(4, 0, 0, 0xff000000);
-            canvas.drawArc(r1, startAngle-3, 3, false, paint);
-            //canvas.drawArc(r1, startAngle, 2, false, paint);
-
-
-
+            canvas.drawArc(r1, startAngle - 3, 3, false, paint);
 
         }
 
@@ -219,18 +211,14 @@ public class DrawUtils {
             float margin = 3.65f;
             r1.set(0, 0, width, width);
 
-            paint.setShadowLayer(4, 0, 0, 0x00000000);
 
             float millis = System.currentTimeMillis()%60000;
             float startAngle = (360*millis/60000)-90;
 
-//            paint.setColor(0xff000000);
-//            canvas.drawArc(r1, startAngle - 1, 4, false, paint);
-
+            paint.setColor(Color.argb(160, Color.red(0), Color.green(0), Color.blue(0)));
+            canvas.drawArc(r1, startAngle-4, 5, false, paint);
             paint.setColor(color);
-            paint.setShadowLayer(4, 0, 0, 0xff000000);
-            canvas.drawArc(r1, startAngle-3, 3, false, paint);
-            //canvas.drawArc(r1, startAngle, 2, false, paint);
+            canvas.drawArc(r1, startAngle - 3, 3, false, paint);
 
 
 
@@ -238,6 +226,110 @@ public class DrawUtils {
         }
 
     }
+
+
+    public static void drawCircle(int color, float chunk, Paint textPaint){
+        if (!isInAmbientMode) {
+
+            chunk = p20(chunk);
+
+            paint.setStrokeCap(Paint.Cap.BUTT);
+            paint.setAntiAlias(true);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setFilterBitmap(false);
+            //paint.setShadowLayer(4, 0, 0, 0xff000000);
+            paint.setColor(0xff000000);
+
+            float radius = chunk*4;
+
+            float distanceFromCenter =  width/2 - radius;
+
+
+            float millis = System.currentTimeMillis()%60000;
+            double angle = (2*Math.PI*millis/60000)-Math.PI/2 - 0.03;
+
+            double diffX = Math.cos(angle)*distanceFromCenter;
+            double diffY = Math.sin(angle)*distanceFromCenter;
+
+            double x = distanceFromCenter+diffX+radius;
+            double y = distanceFromCenter+diffY+radius;
+
+            canvas.drawCircle((float) x, (float) y, radius, paint);
+
+
+            String secs = mTime.second<10?("0"+mTime.second):(mTime.second+"");
+
+            Rect r = new Rect();
+            textPaint.setTextAlign(Paint.Align.LEFT);
+            textPaint.setTextSize(Math.round(radius*1.7));
+            textPaint.getTextBounds(secs, 0, secs.length(), r);
+
+            textPaint.setShadowLayer(0, 0, 0, 0x00000000);
+            textPaint.setColor(0xffffffff);
+            double textX = x-r.width() / 2 - r.left;
+            double textY = y+r.height()/2+r.bottom;
+            canvas.drawText(secs,(float)textX,(float)textY,textPaint);
+
+        }
+
+    }
+
+    public static void drawNoCircle(int color, float chunk, Paint textPaint){
+        if (!isInAmbientMode) {
+
+            chunk = p20(chunk);
+
+            paint.setStrokeCap(Paint.Cap.BUTT);
+            paint.setAntiAlias(true);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setFilterBitmap(false);
+            //paint.setShadowLayer(4, 0, 0, 0xff000000);
+            paint.setColor(color);
+
+            float radius = chunk*4;
+
+            float distanceFromCenter =  width/2 - radius;
+
+
+            float millis = System.currentTimeMillis()%60000;
+            double angle = (2*Math.PI*millis/60000)-Math.PI/2 - 0.03;
+
+            double diffX = Math.cos(angle)*distanceFromCenter;
+            double diffY = Math.sin(angle)*distanceFromCenter;
+
+            double x = distanceFromCenter+diffX+radius;
+            double y = distanceFromCenter+diffY+radius;
+
+            float startAngle = (360*millis/60000)-90;
+            RectF r1 = new RectF();
+            r1.set(0, 0, width, width);
+            paint.setStrokeWidth(radius*4);
+            paint.setAntiAlias(true);
+            paint.setStrokeCap(Paint.Cap.BUTT);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setFilterBitmap(false);
+            canvas.drawArc(r1, startAngle - 12, 21, false, paint);
+            //canvas.drawCircle((float) x, (float) y, radius, paint);
+
+            paint.setColor(0xff000000);
+            String secs = mTime.second<10?("0"+mTime.second):(mTime.second+"");
+
+            Rect r = new Rect();
+            textPaint.setTextAlign(Paint.Align.LEFT);
+            textPaint.setTextSize(Math.round(radius*1.7));
+            textPaint.getTextBounds(secs, 0, secs.length(), r);
+
+            textPaint.setShadowLayer(0, 0, 0, 0x00000000);
+            textPaint.setColor(0xff000000);
+            double textX = x-r.width() / 2 - r.left;
+            double textY = y+r.height()/2+r.bottom;
+            canvas.drawText(secs,(float)textX,(float)textY,textPaint);
+
+        }
+
+    }
+
+
 
     public static void drawSpin(int color, int speed, float widthStroke, float size, boolean clockwise, boolean alpha){
 
@@ -337,6 +429,18 @@ public class DrawUtils {
     public static int getI(String key, Context context){
         SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
         return preferences.getInt(key, 0);
+    }
+
+    public static void set(String key, long value, Context context){
+        SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putLong(key, value);
+        edit.commit();
+    }
+
+    public static long getL(String key, Context context){
+        SharedPreferences preferences = context.getSharedPreferences("spin", context.MODE_PRIVATE);
+        return preferences.getLong(key, 0);
     }
 
 
