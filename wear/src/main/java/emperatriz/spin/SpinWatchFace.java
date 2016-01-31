@@ -62,7 +62,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
     static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3;
     static int WEEKDAY=0, STEPS=1;
-    int outmode = NORMAL;
+    int outmode = CIRCLE_OVERLAP;
     int inmode = WEEKDAY;
 
     @Override
@@ -416,17 +416,17 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                 }
             }else if (outmode==CIRCLE){
                 if (!isRound){
-                    DrawUtils.drawSpin2(color, speed1, chunkSq * 4, 1, clockwise1, false);
-                    DrawUtils.drawSpin2(color, speed2, chunkSq*3, size2, clockwise2, true);
-                    DrawUtils.drawSpin2(color, speed3, chunkSq*2, size3, clockwise3, true);
-                    DrawUtils.drawSpin2(color, speed4, chunkSq, size1, clockwise1,true);
-                    DrawUtils.drawCircle(color, chunkSq, mTextPaint);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq * 4, 1, clockwise1, false);
+                    DrawUtils.drawSpin2(color, speed1, chunkSq*3, size2, clockwise2, true);
+                    DrawUtils.drawSpin2(color, speed2, chunkSq*2, size3, clockwise3, true);
+                    DrawUtils.drawSpin2(color, speed3, chunkSq, size1, clockwise1,true);
+                    DrawUtils.drawCircle(color, chunkSq, mTextPaint,isRound);
                 }else{
-                    DrawUtils.drawSpin(color, speed1, chunk*4, 1, clockwise1,false);
-                    DrawUtils.drawSpin(color, speed2, chunk*3, size2, clockwise2,true);
-                    DrawUtils.drawSpin(color, speed3, chunk*2, size3, clockwise3,true);
-                    DrawUtils.drawSpin(color, speed4, chunk, size1, clockwise1,true);
-                    DrawUtils.drawCircle(color, chunk, mTextPaint);
+                    DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise1,false);
+                    DrawUtils.drawSpin(color, speed1, chunk*3, size2, clockwise2,true);
+                    DrawUtils.drawSpin(color, speed2, chunk*2, size3, clockwise3,true);
+                    DrawUtils.drawSpin(color, speed3, chunk, size1, clockwise1,true);
+                    DrawUtils.drawCircle(color, chunk, mTextPaint,isRound);
                 }
             } else if (outmode==CIRCLE_OVERLAP){
                 if (!isRound){
@@ -435,14 +435,14 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     DrawUtils.drawSpin2(color, speed3, chunkSq*4, size3, clockwise3,true);
                     DrawUtils.drawSpin2(color, speed4, chunkSq * 4, size4, clockwise4, true);
                     DrawUtils.drawSpin2(color, speed4, chunkSq*4, 1, clockwise4,true);
-                    DrawUtils.drawNoCircle(color, chunkSq, mTextPaint);
+                    DrawUtils.drawNoCircle(color, chunkSq, mTextPaint, isRound);
                 }else{
                     DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
                     DrawUtils.drawSpin(color, speed2, chunk*4, size2, clockwise2,true);
                     DrawUtils.drawSpin(color, speed3, chunk*4, size3, clockwise3,true);
                     DrawUtils.drawSpin(color, speed4, chunk * 4, size4, clockwise4, true);
                     DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise4,true);
-                    DrawUtils.drawNoCircle(color, chunk, mTextPaint);
+                    DrawUtils.drawNoCircle(color, chunk, mTextPaint, isRound);
                 }
             }
 

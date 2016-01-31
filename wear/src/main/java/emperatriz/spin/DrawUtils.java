@@ -228,7 +228,7 @@ public class DrawUtils {
     }
 
 
-    public static void drawCircle(int color, float chunk, Paint textPaint){
+    public static void drawCircle(int color, float chunk, Paint textPaint, boolean isRound){
         if (!isInAmbientMode) {
 
             chunk = p20(chunk);
@@ -240,7 +240,8 @@ public class DrawUtils {
             //paint.setShadowLayer(4, 0, 0, 0xff000000);
             paint.setColor(0xff000000);
 
-            float radius = chunk*4;
+            float radius = isRound?chunk*4:chunk*2;
+
 
             float distanceFromCenter =  width/2 - radius;
 
@@ -274,7 +275,7 @@ public class DrawUtils {
 
     }
 
-    public static void drawNoCircle(int color, float chunk, Paint textPaint){
+    public static void drawNoCircle(int color, float chunk, Paint textPaint, boolean isRound){
         if (!isInAmbientMode) {
 
             chunk = p20(chunk);
@@ -286,7 +287,7 @@ public class DrawUtils {
             //paint.setShadowLayer(4, 0, 0, 0xff000000);
             paint.setColor(color);
 
-            float radius = chunk*4;
+            float radius = isRound?chunk*4:chunk*2;
 
             float distanceFromCenter =  width/2 - radius;
 
