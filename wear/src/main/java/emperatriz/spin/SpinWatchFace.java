@@ -8,10 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -29,7 +26,6 @@ import android.text.format.Time;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -62,7 +58,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
     static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3;
     static int WEEKDAY=0, STEPS=1;
-    int outmode = CIRCLE_OVERLAP;
+    int outmode = NORMAL;
     int inmode = WEEKDAY;
 
     @Override
@@ -141,7 +137,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
         boolean mRegisteredTimeZoneReceiver = false;
 
         Paint mBackgroundPaint;
-        Paint mTextPaint,mTextPaint2,mTextPaint3;
+        Paint paintText, paintTime;
 
         boolean mAmbient;
 
@@ -175,15 +171,19 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.digital_background));
 
-            mTextPaint = new Paint();
-            mTextPaint2= new Paint();
-            mTextPaint3= new Paint();
+            paintText = new Paint();
+            paintTime = new Paint();
+
             Typeface font1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster Bold.ttf");
-            Typeface font2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster.ttf");
-//            Typeface font3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster Bold.ttf");
-            mTextPaint.setTypeface(font1);
-            mTextPaint2.setTypeface(font1);
-            mTextPaint3.setTypeface(font2);
+            Typeface font2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster Condensed.ttf");
+            Typeface font3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/SF Movie Poster.ttf");
+            paintText.setTypeface(font2);
+            paintTime.setTypeface(font3);
+            paintText.setAntiAlias(true);
+            paintTime.setAntiAlias(true);
+//            paintRegular.setFakeBoldText(true);
+            paintText.setLetterSpacing(0.03f);
+
 
             DrawUtils.mTime = new Time();
 
@@ -294,7 +294,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
             float textSize = resources.getDimension(isRound
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
-            mTextPaint.setTextSize(textSize);
+            paintText.setTextSize(textSize);
         }
 
         @Override
@@ -420,13 +420,13 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     DrawUtils.drawSpin2(color, speed1, chunkSq*3, size2, clockwise2, true);
                     DrawUtils.drawSpin2(color, speed2, chunkSq*2, size3, clockwise3, true);
                     DrawUtils.drawSpin2(color, speed3, chunkSq, size1, clockwise1,true);
-                    DrawUtils.drawCircle(color, chunkSq, mTextPaint,isRound);
+                    DrawUtils.drawCircle(color, chunkSq, paintText,isRound);
                 }else{
                     DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise1,false);
                     DrawUtils.drawSpin(color, speed1, chunk*3, size2, clockwise2,true);
                     DrawUtils.drawSpin(color, speed2, chunk*2, size3, clockwise3,true);
                     DrawUtils.drawSpin(color, speed3, chunk, size1, clockwise1,true);
-                    DrawUtils.drawCircle(color, chunk, mTextPaint,isRound);
+                    DrawUtils.drawCircle(color, chunk, paintText,isRound);
                 }
             } else if (outmode==CIRCLE_OVERLAP){
                 if (!isRound){
@@ -435,14 +435,14 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     DrawUtils.drawSpin2(color, speed3, chunkSq*4, size3, clockwise3,true);
                     DrawUtils.drawSpin2(color, speed4, chunkSq * 4, size4, clockwise4, true);
                     DrawUtils.drawSpin2(color, speed4, chunkSq*4, 1, clockwise4,true);
-                    DrawUtils.drawNoCircle(color, chunkSq, mTextPaint, isRound);
+                    DrawUtils.drawNoCircle(color, chunkSq, paintText, isRound);
                 }else{
                     DrawUtils.drawSpin(color, speed1, chunk*4, size1, clockwise1,false);
                     DrawUtils.drawSpin(color, speed2, chunk*4, size2, clockwise2,true);
                     DrawUtils.drawSpin(color, speed3, chunk*4, size3, clockwise3,true);
                     DrawUtils.drawSpin(color, speed4, chunk * 4, size4, clockwise4, true);
                     DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise4,true);
-                    DrawUtils.drawNoCircle(color, chunk, mTextPaint, isRound);
+                    DrawUtils.drawNoCircle(color, chunk, paintText, isRound);
                 }
             }
 
@@ -450,11 +450,11 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
 
 
             DecimalFormat df = new DecimalFormat("00");
-            float dateHeight = DrawUtils.drawCenteredText(df.format(DrawUtils.mTime.hour)+":"+ df.format(DrawUtils.mTime.minute),"", mTextPaint3, mTextPaint);
+            float dateHeight = DrawUtils.drawCenteredText(df.format(DrawUtils.mTime.hour)+":"+ df.format(DrawUtils.mTime.minute), paintTime);
 
 
             todaySteps = DrawUtils.getI("steps", SpinWatchFace.this);
-            DrawUtils.drawDate(0xffbbbbbb, mTextPaint, inmode==WEEKDAY,saveLastSteps?0:steps-todaySteps, dateHeight);
+            DrawUtils.drawDate(0xffbbbbbb, paintText, inmode==WEEKDAY,saveLastSteps?0:steps-todaySteps, dateHeight);
 
 
             if (isVisible() && !isInAmbientMode()) {

@@ -54,7 +54,7 @@ public class DrawUtils {
         }
     }
 
-    public static float drawCenteredText(String hh, String mm, Paint paint, Paint paint2){
+    public static float drawCenteredText(String t,  Paint paint){
         float size=p20(10f);
 
         float gap=180;
@@ -69,18 +69,15 @@ public class DrawUtils {
         }
         paint.setAntiAlias(true);
         paint.setTextSize(size);
-        paint2.setAntiAlias(true);
-        paint2.setTextSize(size);
+
 
 
         int cHeight = canvas.getClipBounds().height();
         int cWidth = canvas.getClipBounds().width();
         Rect r = new Rect();
         paint.setTextAlign(Paint.Align.LEFT);
-        paint.getTextBounds(hh, 0, hh.length(), r);
+        paint.getTextBounds(t, 0, t.length(), r);
         Rect r2 = new Rect();
-        paint2.setTextAlign(Paint.Align.LEFT);
-        paint2.getTextBounds(mm, 0, mm.length(), r2);
         float xPos = cWidth / 2f - (r.width()+r2.width()) / 2f - r.left - r2.left;
         float x2Pos = xPos + r.width()+ r2.left*2;
         float yPos = cHeight / 2f + r.height() / 2f - r.bottom;
@@ -88,26 +85,19 @@ public class DrawUtils {
         if (isInAmbientMode){
             paint.setColor(0xff000000);
             paint.setShadowLayer(2, 0, 0, 0xffffffff);
-            paint2.setColor(0xff000000);
-            paint2.setShadowLayer(2, 0, 0, 0xffffffff);
-            canvas.drawText(hh, xPos, yPos, paint);
-            canvas.drawText(mm, x2Pos, yPos, paint2);
-            canvas.drawText(hh, xPos, yPos, paint);
-            canvas.drawText(mm, x2Pos, yPos, paint2);
-            canvas.drawText(hh, xPos, yPos, paint);
-            canvas.drawText(mm, x2Pos, yPos, paint2);
-            canvas.drawText(hh, xPos, yPos, paint);
-            canvas.drawText(mm, x2Pos, yPos, paint2);
+            canvas.drawText(t, xPos, yPos, paint);
+            canvas.drawText(t, xPos, yPos, paint);
+            canvas.drawText(t, xPos, yPos, paint);
+            canvas.drawText(t, xPos, yPos, paint);
+            canvas.drawText(t, xPos, yPos, paint);
+            canvas.drawText(t, xPos, yPos, paint);
+
 
 
         }else{
             paint.setColor(0xffffffff);
             paint.setShadowLayer(0, 0, 0, 0xffffffff);
-            paint2.setColor(0xffffffff);
-            paint2.setShadowLayer(0, 0, 0, 0xffffffff);
-            canvas.drawText(hh, xPos, yPos, paint);
-            canvas.drawText(mm, x2Pos, yPos, paint2);
-
+            canvas.drawText(t, xPos, yPos, paint);
         }
 
 
