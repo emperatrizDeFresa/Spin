@@ -56,9 +56,9 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
     boolean saveLastSteps=true;
 
 
-    static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3, EXCENTRIC=4;
+    static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3, EXCENTRIC=4, EXCENTRIC_CIRCLE=5;
     static int WEEKDAY=0, STEPS=1;
-    int outmode = EXCENTRIC;
+    int outmode = NORMAL;
     int inmode = WEEKDAY;
 
     @Override
@@ -212,7 +212,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     }
                     else{
                         outmode++;
-                        if (outmode>=5) outmode=0;
+                        if (outmode>=6) outmode=0;
                     }
                 }
                 DrawUtils.set("lastTap",Calendar.getInstance().getTimeInMillis(),getApplicationContext());
@@ -446,10 +446,10 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                 }
             }else if (outmode==EXCENTRIC){
                 if (!isRound){
-                    DrawUtils.drawExcentric2(color, speed1+1, chunkSq * 4, clockwise1);
+                    DrawUtils.drawExcentric2(color, speed1 + 1, chunkSq * 4, clockwise1);
                     DrawUtils.drawExcentric2(color, speed2, chunkSq * 4, clockwise2);
                     DrawUtils.drawExcentric2(color, speed1, chunkSq * 4, clockwise3);
-                    DrawUtils.drawExcentric2(color, speed2+2, chunkSq * 4, clockwise4);
+                    DrawUtils.drawExcentric2(color, speed2 + 2, chunkSq * 4, clockwise4);
                     DrawUtils.drawSpin2(color, speed4, chunkSq * 4, 1, clockwise4, true);
                     DrawUtils.drawSeconds2(color, chunkSq);
                 }else{
@@ -459,6 +459,22 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     DrawUtils.drawExcentric(color, speed2+2, chunk * 4, clockwise4);
                     DrawUtils.drawSpin(color, speed4, chunk * 4, 1, clockwise4, true);
                     DrawUtils.drawSeconds(color, chunk);
+                }
+            }else if (outmode==EXCENTRIC_CIRCLE){
+                if (!isRound){
+                    DrawUtils.drawExcentric2(color, speed1 + 1, chunkSq * 4, clockwise1);
+                    DrawUtils.drawExcentric2(color, speed2, chunkSq * 4, clockwise2);
+                    DrawUtils.drawExcentric2(color, speed1, chunkSq * 4, clockwise3);
+                    DrawUtils.drawExcentric2(color, speed2 + 2, chunkSq * 4, clockwise4);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq * 4, 1, clockwise4, true);
+                    DrawUtils.drawCircle(color, chunkSq, paintText, isRound);
+                }else{
+                    DrawUtils.drawExcentric(color, speed1+1, chunk * 4, clockwise1);
+                    DrawUtils.drawExcentric(color, speed2, chunk * 4, clockwise2);
+                    DrawUtils.drawExcentric(color, speed1, chunk * 4, clockwise3);
+                    DrawUtils.drawExcentric(color, speed2+2, chunk * 4, clockwise4);
+                    DrawUtils.drawSpin(color, speed4, chunk * 4, 1, clockwise4, true);
+                    DrawUtils.drawCircle(color, chunk, paintText, isRound);
                 }
             }
 
