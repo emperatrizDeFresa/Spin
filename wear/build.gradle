@@ -9,7 +9,7 @@ android {
         applicationId "emperatriz.spin"
         minSdkVersion 22
         targetSdkVersion 22
-        versionCode 3
+        versionCode 4
         versionName "1.10"
     }
     buildTypes {

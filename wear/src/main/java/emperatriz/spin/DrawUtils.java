@@ -392,6 +392,94 @@ public class DrawUtils {
 
     }
 
+    public static void drawExcentric(int color, int speed, float widthStroke, boolean clockwise){
+
+        if (!isInAmbientMode) {
+
+            color = Color.argb(70, Color.red(color), Color.green(color), Color.blue(color));
+
+
+
+
+            float radius =  p20(widthStroke)+width/2;
+
+            float radius2 =  p20(widthStroke*2);
+
+
+            float millis = System.currentTimeMillis()%(speed*1000);
+            double angle = (2*Math.PI*millis/(speed*1000))-Math.PI / 2;
+
+            angle = clockwise?angle:-angle;
+
+            double diffX = Math.cos(angle)*radius2;
+            double diffY = Math.sin(angle)*radius2;
+
+            float x = Math.round(radius2+diffX);
+            float y = Math.round(radius2+diffY);
+
+
+            RectF r1 = new RectF();
+
+            paint.setStrokeWidth(p20(widthStroke * 2));
+            paint.setAntiAlias(true);
+            paint.setStrokeCap(Paint.Cap.BUTT);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setFilterBitmap(false);
+            paint.setShadowLayer(0, 0, 0, 0xff000000);
+
+            float circleWidth = 10;
+
+            paint.setColor(color);
+            canvas.drawCircle(width / 2 - radius2 + x, width / 2 - radius2 + y, radius, paint);
+
+        }
+
+    }
+
+    public static void drawExcentric2(int color, int speed, float widthStroke, boolean clockwise){
+
+        if (!isInAmbientMode) {
+
+            color = Color.argb(70, Color.red(color), Color.green(color), Color.blue(color));
+
+
+
+
+            float radius =  p20(widthStroke)+width/2;
+
+            float radius2 =  p20(widthStroke);
+
+
+            float millis = System.currentTimeMillis()%(speed*1000);
+            double angle = (2*Math.PI*millis/(speed*1000))-Math.PI / 2;
+
+            angle = clockwise?angle:-angle;
+
+            double diffX = Math.cos(angle)*radius2;
+            double diffY = Math.sin(angle)*radius2;
+
+            float x = Math.round(radius2+diffX);
+            float y = Math.round(radius2+diffY);
+
+
+            RectF r1 = new RectF();
+
+            paint.setStrokeWidth(p20(widthStroke * 2));
+            paint.setAntiAlias(true);
+            paint.setStrokeCap(Paint.Cap.BUTT);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setFilterBitmap(false);
+            paint.setShadowLayer(0, 0, 0, 0xff000000);
+
+            float circleWidth = 10;
+
+            paint.setColor(color);
+            canvas.drawCircle(width / 2  - radius2+ x, width / 2- radius2 + y, radius,paint);
+
+        }
+
+    }
+
 
     public static float random(float max, float min){
         Random r = new Random();

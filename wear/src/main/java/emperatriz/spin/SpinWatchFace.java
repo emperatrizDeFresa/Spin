@@ -56,9 +56,9 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
     boolean saveLastSteps=true;
 
 
-    static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3;
+    static int NORMAL=0, NORMAL_OVERLAP=1, CIRCLE=2, CIRCLE_OVERLAP=3, EXCENTRIC=4;
     static int WEEKDAY=0, STEPS=1;
-    int outmode = NORMAL;
+    int outmode = EXCENTRIC;
     int inmode = WEEKDAY;
 
     @Override
@@ -212,7 +212,7 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     }
                     else{
                         outmode++;
-                        if (outmode>=4) outmode=0;
+                        if (outmode>=5) outmode=0;
                     }
                 }
                 DrawUtils.set("lastTap",Calendar.getInstance().getTimeInMillis(),getApplicationContext());
@@ -443,6 +443,22 @@ public class SpinWatchFace extends CanvasWatchFaceService  implements SensorEven
                     DrawUtils.drawSpin(color, speed4, chunk * 4, size4, clockwise4, true);
                     DrawUtils.drawSpin(color, speed4, chunk*4, 1, clockwise4,true);
                     DrawUtils.drawNoCircle(color, chunk, paintText, isRound);
+                }
+            }else if (outmode==EXCENTRIC){
+                if (!isRound){
+                    DrawUtils.drawExcentric2(color, speed1+1, chunkSq * 4, clockwise1);
+                    DrawUtils.drawExcentric2(color, speed2, chunkSq * 4, clockwise2);
+                    DrawUtils.drawExcentric2(color, speed1, chunkSq * 4, clockwise3);
+                    DrawUtils.drawExcentric2(color, speed2+2, chunkSq * 4, clockwise4);
+                    DrawUtils.drawSpin2(color, speed4, chunkSq * 4, 1, clockwise4, true);
+                    DrawUtils.drawSeconds2(color, chunkSq);
+                }else{
+                    DrawUtils.drawExcentric(color, speed1+1, chunk * 4, clockwise1);
+                    DrawUtils.drawExcentric(color, speed2, chunk * 4, clockwise2);
+                    DrawUtils.drawExcentric(color, speed1, chunk * 4, clockwise3);
+                    DrawUtils.drawExcentric(color, speed2+2, chunk * 4, clockwise4);
+                    DrawUtils.drawSpin(color, speed4, chunk * 4, 1, clockwise4, true);
+                    DrawUtils.drawSeconds(color, chunk);
                 }
             }
 
